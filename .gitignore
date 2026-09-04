@@ -1,0 +1,21 @@
+# Gizli fayllar — HEÇ VAXT git-ə getməsin
+.env
+**/client_secret.json
+**/token.json
+
+# Yaranan/böyük fayllar
+*.mp4
+*.mp3
+scene_*.jpg
+factory.db
+projects.json
+stats.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# n8n / digər
+node_modules/

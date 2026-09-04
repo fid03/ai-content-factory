@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Content Factory — Interactive Prototype v5</title>
+<style>
+:root{
+  --bg:#07130f;--bg2:#0b1e17;--card:#10271f;--card2:#153126;--line:#23473a;
+  --text:#f3f8f4;--muted:#91aaa0;--lime:#d7ff38;--mint:#36e4bb;
+  --purple:#8068ff;--danger:#ff6b82;--amber:#ffc85b;--shadow:0 24px 70px #0008;
+  --ig:linear-gradient(135deg,#8068ff,#ff6b82);
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+radial-gradient(circle at 75% 10%,#183e2b 0,transparent 28%),
+radial-gradient(circle at 15% 85%,#102d22 0,transparent 30%),var(--bg);
+color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;padding:25px 15px;background:#07140fdd;border-right:1px solid var(--line);backdrop-filter:blur(18px)}
+.brand{font-weight:900;font-size:19px;padding:8px 12px 27px;letter-spacing:.3px}.brand i{font-style:normal;color:var(--lime)}
+.nav button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:var(--muted);padding:12px 13px;border-radius:12px;margin:3px 0;text-align:left;cursor:pointer;font-weight:600}
+.nav button:hover,.nav button.active{background:#17372b;color:#fff}.nav button.active{box-shadow:inset 3px 0 0 var(--lime)}
+.account{position:absolute;bottom:20px;left:17px;right:17px;border:1px solid var(--line);background:#0e241b;padding:14px;border-radius:15px}.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--lime),var(--mint));color:#0a1711;display:grid;place-items:center;font-weight:900}
+main{width:100%;max-width:1480px;margin:auto;padding:34px 42px}.page{display:none}.page.active{display:block}
+.eyebrow{font-size:11px;letter-spacing:1.6px;color:var(--lime);font-weight:900}.title{font-size:34px;line-height:1.05;margin:8px 0}.sub{color:var(--muted);margin:0 0 25px}
+.card{background:linear-gradient(145deg,#132d24eF,#0d211aeF);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 15px 45px #0002}
+.grid{display:grid;gap:18px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.command{position:relative;overflow:hidden;padding:27px}.command:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:-120px;top:-140px;background:#cfff3210;filter:blur(2px)}
+textarea,input,select{font:inherit}.command textarea,.editor,.field{width:100%;background:#071711;border:1px solid #2a5143;color:white;border-radius:14px;padding:15px;outline:none}.command textarea{height:92px;resize:none}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.btn{border:0;border-radius:11px;padding:11px 16px;color:white;background:#203d32;font-weight:800;cursor:pointer}.btn:hover{filter:brightness(1.13)}.primary{background:linear-gradient(135deg,var(--lime),#8de52c);color:#0a180f}.mint{background:linear-gradient(135deg,var(--mint),#24bca1);color:#061711}.ghost{background:transparent;border:1px solid var(--line)}.danger{background:#432332}.btn.ig{background:var(--ig);color:#fff}
+.badge{display:inline-flex;padding:5px 9px;border-radius:999px;background:#203e32;color:#bfe0d4;font-size:11px;font-weight:800}.badge.lime{background:#263919;color:var(--lime)}.badge.purple{background:#2c2850;color:#bdb1ff}.badge.ig{background:var(--ig);color:#fff}
+.chip{border:1px solid var(--line);background:#0e241b;color:var(--muted);padding:9px 14px;border-radius:999px;font-weight:800;cursor:pointer;display:inline-flex;gap:8px;align-items:center;font-size:13px}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.45}
+.chip.on{border-color:transparent;color:#0a180f;background:linear-gradient(135deg,var(--lime),#8de52c)}.chip.on .dot{opacity:.9}
+.chip.on.ig{color:#fff;background:var(--ig)}
+.stat{font-size:30px;font-weight:900;margin-top:7px}.label{font-size:12px;color:var(--muted)}
+.project{padding:14px 0;border-bottom:1px solid #214336}.project:last-child{border-bottom:0}
+.status{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800}.green{color:var(--mint)}.yellow{color:var(--amber)}.red{color:var(--danger)}
+.timeline .step{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #214336}.timeline .step:last-child{border-bottom:0}.icon{width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:#18382c;flex:0 0 auto}
+.source{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid #214336}.source:last-child{border:0}.score{color:var(--lime);font-weight:900}
+.review{border:1px solid #546b2c;background:linear-gradient(145deg,#1c301f,#13271d);position:relative;overflow:hidden}.review:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--lime)}
+.review-title{display:flex;gap:14px;align-items:flex-start}.checkpoint{font-size:10px;color:var(--lime);font-weight:900;letter-spacing:1.3px;text-transform:uppercase}
+.topic h3{margin:11px 0 6px}.topic{min-height:210px}.score-big{font-size:29px;color:var(--lime);font-weight:900}
+.tabs{display:flex;gap:7px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:18px}.tab{border:0;background:transparent;color:var(--muted);padding:9px 12px;border-radius:9px;cursor:pointer;font-weight:700}.tab.active{background:#203f33;color:white}
+.editor{min-height:360px;resize:vertical;line-height:1.65}.pane{display:none}.pane.active{display:block}
+.phone{width:290px;aspect-ratio:9/16;margin:auto;background:linear-gradient(150deg,#2d4c3a,#09120e 58%,#6a4cff);border:7px solid #030806;border-radius:32px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow)}.headline{font-size:32px;font-weight:950;line-height:.93}.caption{font-size:11px;background:#000b;padding:9px;border-radius:9px}
+.phone.ig{background:linear-gradient(150deg,#3a2d5c,#0d0910 58%,#ff6b82)}
+.progress{height:8px;background:#07110d;border-radius:20px;overflow:hidden}.progress span{display:block;height:100%;width:74%;background:linear-gradient(90deg,var(--lime),var(--mint))}
+.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:13px;border-bottom:1px solid #214336;font-size:13px}.table th{color:#78978a}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.day{min-height:108px;border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--muted)}.event{margin-top:8px;background:#1c4234;color:#dff7ec;padding:7px;border-radius:8px;font-size:10px}.event.ig{background:linear-gradient(135deg,#3a2f66,#5c2f3f);color:#f2e3ec}
+.bar{height:9px;background:#07110d;border-radius:20px;overflow:hidden}.bar i{display:block;height:100%;background:var(--mint);border-radius:20px}.bar i.ig{background:var(--ig)}
+.toast{position:fixed;right:22px;bottom:22px;background:#17382c;border:1px solid #416b58;padding:15px 18px;border-radius:13px;display:none;z-index:10;box-shadow:var(--shadow)}
+.modal{position:fixed;inset:0;background:#000b;display:none;place-items:center;padding:20px;z-index:20}.modal.show{display:grid}.modalbox{width:min(560px,100%);background:#10271f;border:1px solid var(--line);border-radius:22px;padding:25px;box-shadow:var(--shadow)}
+.card.ig-tint{border-color:#5a3a6e;background:linear-gradient(145deg,#211a33,#170f22)}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.account{display:none}.nav{display:flex;overflow:auto}.nav button{min-width:max-content}.g2,.g3,.g4{grid-template-columns:1fr}main{padding:25px 16px}}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid #ffffff33;border-top-color:var(--lime);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-left:10px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">✦ AI <i>CONTENT FACTORY</i></div>
+  <div class="nav">
+    <button class="active" data-page="dashboard">◉ <span>Dashboard</span></button>
+    <button data-page="create">✦ <span>Create</span></button>
+    <button data-page="research">⌕ <span>Research</span></button>
+    <button data-page="studio">◫ <span>Content Studio</span></button>
+    <button data-page="publish">↥ <span>Publishing</span></button>
+    <button data-page="projects">▣ <span>Projects</span></button>
+    <button data-page="calendar">◷ <span>Calendar</span></button>
+    <button data-page="analytics">◇ <span>Analytics</span></button>
+    <button data-page="settings">⚙ <span>Settings</span></button>
+  </div>
+  <div class="account"><div class="row"><div class="avatar">F</div><div><b>Fidan</b><br><span class="label">Creator workspace</span></div></div>
+  <div style="margin-top:12px" class="label">YouTube <span class="green">● Connected</span></div>
+  <div style="margin-top:6px" class="label">Instagram <span class="green">● Connected</span></div></div>
+</aside>
+
+<main>
+<section id="dashboard" class="page active">
+<div class="eyebrow">AI COMMAND CENTER</div><h1 class="title">Turn an idea into content.</h1><p class="sub">Give the factory a goal. It researches, creates and prepares the final deliverables for every connected platform.</p>
+<div class="card command"><div class="row between"><div><b>Welcome back, Fidan</b><div class="label" style="margin-top:5px">Your AI content workspace</div></div><span class="badge lime">● Factory ready</span></div>
+<p class="sub" style="margin:14px 0 0">Start a new video from the <b>Create</b> page — define your goal once and the factory researches, writes, produces and prepares it for every connected platform.</p>
+<div class="row between" style="margin-top:16px"><span class="label">Topic checkpoint + publish checkpoint keep you in control.</span><button class="btn primary" onclick="go('create')">✦ Go to Create</button></div></div>
+<div class="grid g4"><div class="card"><div class="label">VIDEOS CREATED</div><div class="stat">0</div></div><div class="card"><div class="label">PUBLISHED</div><div class="stat">0</div></div><div class="card"><div class="label">RESEARCH RUNS</div><div class="stat">0</div></div><div class="card"><div class="label">SOURCES ANALYZED</div><div class="stat">0</div></div></div>
+<div class="grid g2" style="margin-top:18px"><div class="card"><h3>Recent projects</h3>
+<div class="project"><b>AI Agents Weekly</b> <span class="badge lime" style="float:right">YT + IG</span><br><span class="status green">● Published</span></div>
+<div class="project"><b>Humanoid Robots</b> <span class="badge ig" style="float:right">IG only</span><br><span class="status yellow">● Review required</span></div>
+<div class="project"><b>Open Source LLMs</b> <span class="badge" style="float:right">YT + IG</span><br><span class="badge">Draft</span></div></div>
+<div class="card"><h3>Factory activity</h3><div class="timeline"><div class="step"><div class="icon">✓</div><div><b>Research</b><br><span class="label" id="faSources">— sources analyzed</span></div></div><div class="step"><div class="icon">◆</div><div><b>Topics generated</b><br><span class="label" id="faRuns">— research runs</span></div></div><div class="step"><div class="icon">▶</div><div><b>Published</b><br><span class="label" id="faPublished">— videos published</span></div></div></div></div></div>
+</section>
+
+<section id="create" class="page">
+<div class="eyebrow">NEW PROJECT</div><h1 class="title">Create</h1><p class="sub">Define the goal once. The workflow handles the production stages for every selected platform.</p>
+<div class="grid g2"><div class="card"><h3>Command</h3><textarea class="editor" style="min-height:190px">Research the latest AI developments, choose the most engaging topic and create a 45-second vertical video for YouTube Shorts and Instagram Reels.</textarea><div class="row"><button class="btn ghost" id="voiceBtn" onclick="toggleVoice()">🎙 Record voice</button><button class="btn primary" onclick="startFactory()">Start workflow</button></div></div>
+<div class="card"><h3>Production settings</h3>
+<p class="label">Publish to</p>
+<div class="row">
+  <button class="chip on" data-platform="yt" onclick="togglePlatform(this)"><span class="dot"></span>▶ YouTube Shorts</button>
+  <button class="chip on ig" data-platform="ig-reel" onclick="togglePlatform(this)"><span class="dot"></span>◎ Instagram Reels</button>
+  <button class="chip ig" data-platform="ig-carousel" onclick="togglePlatform(this)"><span class="dot"></span>▦ Instagram Carousel</button>
+</div>
+<p class="label" style="margin-top:8px">Same 9:16 master video is reused for Shorts and Reels. Carousel repurposes the scene visuals as an image post.</p>
+<p class="label">Also generate</p><div class="row"><span class="badge">📊 Research report</span></div>
+<p class="label">Duration</p><div class="row" id="durRow"><button class="btn" data-dur="30" onclick="setDur(this)">30 sec</button><button class="btn primary" data-dur="45" onclick="setDur(this)">45 sec</button><button class="btn" data-dur="60" onclick="setDur(this)">60 sec</button></div>
+<p class="label">Review points</p><div class="project">Topic selection <span class="badge" style="float:right">Required</span></div><div class="project">Final publish <span class="badge" style="float:right">Required</span></div></div></div>
+</section>
+
+<section id="research" class="page">
+<div class="eyebrow">RESEARCH ENGINE</div><h1 class="title">Research</h1><p class="sub">Sources are collected, extracted, scored and turned into a recommendation.</p>
+<div class="grid g2"><div class="card"><h3>Workflow progress</h3><div class="timeline">
+<div class="step"><div class="icon">✓</div><div><b>Request understood</b><br><span class="label">Intent, platforms and duration extracted</span></div></div>
+<div class="step"><div class="icon">✓</div><div><b>Research plan created</b><br><span class="label">Multi-source strategy ready</span></div></div>
+<div class="step"><div class="icon">✓</div><div><b>Web sources collected</b><br><span class="label">17 sources</span></div></div>
+<div class="step"><div class="icon">✓</div><div><b>Content extracted</b><br><span class="label">Web pages, PDF and image text</span></div></div>
+<div class="step"><div class="icon">✓</div><div><b>Topics ranked</b><br><span class="label">Recommendation generated</span></div></div></div></div>
+<div class="card"><h3>Source intelligence</h3><div id="sourceList"><p class="label">Run research to load real sources.</p></div></div></div>
+<div class="card review" style="margin-top:18px"><div class="review-title"><div style="flex:1"><div class="checkpoint">Review checkpoint · Topic</div><h2 style="margin:8px 0">Recommended topic: AI Agents Are Becoming Autonomous Workers</h2><p class="sub">Strong recent coverage, specific angle and high short-form potential across Shorts and Reels.</p></div><div class="score-big">94%</div></div>
+<div class="grid g3"><div class="card topic"><span class="badge lime">Recommended</span><h3>Run research to load topics</h3><p class="label">—</p><button class="btn primary" onclick="approveTopic()">✓ Approve</button></div><div class="card topic"><span class="badge">Alternative</span><h3>—</h3><p class="label">—</p><button class="btn" onclick="approveTopic()">Select</button></div><div class="card topic"><span class="badge">Alternative</span><h3>—</h3><p class="label">—</p><button class="btn" onclick="approveTopic()">Select</button></div></div>
+<div style="margin-top:16px"><textarea id="feedback" class="field" style="min-height:75px" placeholder='Want a different result? Example: “Make it more specific and focus on AI agents.”'></textarea><div class="row" style="margin-top:10px"><button class="btn" onclick="researchAgain()">↻ Research Again</button></div></div></div>
+</section>
+
+<section id="studio" class="page">
+<div class="eyebrow">PRODUCTION</div><h1 class="title">Content Studio</h1><p class="sub">Edit the generated assets before the final publishing checkpoint.</p>
+<div class="tabs"><button class="tab active" onclick="selectTab(this,'scriptPane')">Script</button><button class="tab" onclick="selectTab(this,'visualPane')">Visuals</button><button class="tab" onclick="selectTab(this,'voicePane')">Voice</button><button class="tab" onclick="selectTab(this,'videoPane')">Video</button></div>
+<div id="scriptPane" class="pane active"><div class="grid g2"><div class="card"><div class="row between"><h3>45-second script</h3><span class="badge">Editable</span></div><textarea class="editor">HOOK
+What if your next coworker isn't human?
+
+BODY
+AI agents are moving beyond simple chatbots. New systems can plan tasks, use tools, access workflows and complete multi-step objectives.
+
+WHY IT MATTERS
+This could change how companies automate research, customer support and repetitive knowledge work.
+
+ENDING
+The big question is no longer whether AI can answer. It's whether AI can act.</textarea><div class="row"><button class="btn">↻ Regenerate</button><button class="btn primary" onclick="showToast('Script saved. Video production can continue.')">Save changes</button></div></div><div class="card"><h3>Content quality</h3><div class="project">✓ Hook detected</div><div class="project">✓ ~45 sec estimated duration</div><div class="project">✓ 4 visual scenes</div><div class="project">✓ Closing question</div><div style="margin-top:25px" class="progress"><span style="width:86%"></span></div><p class="label">Engagement potential · 86%</p></div></div></div>
+<div id="visualPane" class="pane"><div class="grid g4"><div class="card topic"><b>Scene 01</b><h3>YOUR NEXT COWORKER?</h3><p class="label">0–5 sec · Hook</p></div><div class="card topic"><b>Scene 02</b><h3>AI THAT CAN ACT</h3><p class="label">5–18 sec · Explanation</p></div><div class="card topic"><b>Scene 03</b><h3>WHY IT MATTERS</h3><p class="label">18–35 sec · Key fact</p></div><div class="card topic"><b>Scene 04</b><h3>WHAT HAPPENS NEXT?</h3><p class="label">35–45 sec · Ending</p></div></div><p class="label" style="margin-top:12px">These 4 scenes also export as an Instagram Carousel (4:5 image post).</p></div>
+<div id="voicePane" class="pane"><div class="card"><h3>Voice-over</h3><p class="sub" id="voiceMeta">Generated narration (TTS · English)</p><audio id="voiceAudio" controls style="width:100%;margin-top:10px"></audio><p class="label" id="voiceHint" style="margin-top:10px">Run a topic to generate the real voice-over.</p></div></div>
+<div id="videoPane" class="pane">
+<div class="card" style="margin-bottom:18px"><div class="row between"><h3>Final video — 1080×1920</h3><span class="badge lime">Real MP4</span></div><video id="finalVideo" controls playsinline style="width:290px;aspect-ratio:9/16;display:block;margin:14px auto 0;border-radius:18px;background:#000"></video><p class="label" id="videoHint" style="text-align:center;margin-top:10px">Run a topic to generate the real video with voice-over.</p></div>
+<div class="grid g2">
+<div class="card"><div class="row between" style="margin-bottom:14px"><h3>Preview</h3><div class="row"><button class="chip on" id="prevYt" onclick="switchPreview('yt')"><span class="dot"></span>Shorts</button><button class="chip ig" id="prevIg" onclick="switchPreview('ig')"><span class="dot"></span>Reels</button></div></div>
+<div class="phone" id="studioPhone"><div><span class="badge lime" id="phoneTag">AI NEWS</span><div class="headline">AI AGENTS<br>CAN ACT.</div></div><div class="caption">“AI agents are moving beyond simple chatbots...”</div></div></div>
+<div class="card"><h3>Platform-ready exports</h3><div class="project">✓ YouTube Shorts — 1080×1920 MP4</div><div class="project">✓ Instagram Reels — same 9:16 master</div><div class="project">✓ Instagram Carousel — 4 scene images (4:5)</div><div class="project">✓ Voice-over + subtitles attached</div><div class="project">✓ Captions & hashtags generated per platform</div><button class="btn primary" style="margin-top:18px" onclick="go('publish')">Continue to Publishing</button></div></div></div>
+</section>
+
+<section id="publish" class="page">
+<div class="eyebrow">PUBLISHING</div><h1 class="title">Final review</h1><p class="sub">Everything is ready. Publishing happens only after the confirmation below.</p>
+<div class="grid g2"><div class="card"><div class="checkpoint">Review checkpoint · Publish</div><div class="phone" style="margin-top:15px"><div><span class="badge lime">AI NEWS</span><div class="headline">AI AGENTS<br>CAN ACT.</div></div><div class="caption">45 sec · 9:16 · 1080×1920 · Shorts + Reels</div></div></div>
+<div>
+<div class="card"><div class="row between"><h3>▶ YouTube Shorts</h3><button class="chip on" data-pub="yt" onclick="togglePlatform(this)"><span class="dot"></span>Publish here</button></div>
+<label class="label">Title</label><textarea class="field" style="min-height:56px">AI Agents Are Becoming Your Next Coworker 🤖</textarea>
+<label class="label">Description</label><textarea class="field" style="min-height:80px">AI agents can plan, use tools and complete multi-step tasks. Here is why that matters.</textarea>
+<label class="label">Visibility</label><div class="row" id="visRow"><button class="btn primary" data-vis="public" onclick="setVis(this)">● Public</button><button class="btn" data-vis="unlisted" onclick="setVis(this)">Unlisted</button><button class="btn" data-vis="private" onclick="setVis(this)">Private</button></div></div>
+
+<div class="card ig-tint" style="margin-top:18px"><div class="row between"><h3>◎ Instagram Reels</h3><button class="chip on ig" data-pub="ig" onclick="togglePlatform(this)"><span class="dot"></span>Publish here</button></div>
+<label class="label">Caption</label><textarea class="field" style="min-height:80px">Your next coworker might not be human 🤖 AI agents can now plan, use tools and finish multi-step tasks. Would you let one run your workflow?</textarea>
+<label class="label">Hashtags</label><textarea class="field" style="min-height:56px">#AI #AIagents #artificialintelligence #tech #automation #futureofwork #reels</textarea>
+<label class="label">Share as</label><div class="row"><button class="btn ig">● Reels + Feed</button><button class="btn">Reels only</button></div></div>
+
+<div class="card" style="margin-top:18px;background:#173326"><b>Ready to publish</b><p class="label" id="publishNote">The video will be uploaded to YouTube and Instagram after confirmation.</p><button class="btn primary" onclick="publishVideo()">🚀 Confirm & Publish</button></div></div></div>
+</section>
+
+<section id="projects" class="page"><div class="eyebrow">WORKSPACE</div><h1 class="title">Projects</h1><p class="sub">Every research run and content package stays organized here.</p><div class="card"><table class="table"><tr><th>Project</th><th>Status</th><th>Platforms</th><th>Sources</th><th>Created</th><th></th></tr><tr><td>AI Agents Weekly</td><td class="green">● Published</td><td><span class="badge lime">YT</span> <span class="badge ig">IG</span></td><td>17</td><td>Today</td><td><button class="btn" onclick="go('studio')">Open</button></td></tr><tr><td>Humanoid Robots</td><td class="yellow">● Review required</td><td><span class="badge ig">IG</span></td><td>11</td><td>Yesterday</td><td><button class="btn" onclick="go('research')">Review</button></td></tr><tr><td>Open Source LLMs</td><td>Draft</td><td><span class="badge lime">YT</span> <span class="badge ig">IG</span></td><td>—</td><td>Aug 30</td><td><button class="btn">Open</button></td></tr></table></div></section>
+
+<section id="calendar" class="page"><div class="eyebrow">SCHEDULING</div><h1 class="title">Content Calendar</h1><p class="sub">Plan research, production and publishing windows across platforms.</p><div class="card"><div class="calendar"><div class="day"><b>1</b></div><div class="day"><b>2</b><div class="event">09:00 Research</div></div><div class="day"><b>3</b></div><div class="day"><b>4</b><div class="event">18:00 YT Short</div><div class="event ig">18:00 IG Reel</div></div><div class="day"><b>5</b></div><div class="day"><b>6</b></div><div class="day"><b>7</b></div><div class="day"><b>8</b></div><div class="day"><b>9</b><div class="event">09:00 Research</div></div><div class="day"><b>10</b></div><div class="day"><b>11</b><div class="event">18:00 YT Short</div><div class="event ig">18:00 IG Reel</div></div><div class="day"><b>12</b></div><div class="day"><b>13</b><div class="event ig">12:00 IG Carousel</div></div><div class="day"><b>14</b></div><div class="day"><b>15</b></div><div class="day"><b>16</b><div class="event">09:00 Research</div></div><div class="day"><b>17</b></div><div class="day"><b>18</b><div class="event">18:00 YT Short</div><div class="event ig">18:00 IG Reel</div></div><div class="day"><b>19</b></div><div class="day"><b>20</b></div><div class="day"><b>21</b></div><div class="day"><b>22</b></div><div class="day"><b>23</b><div class="event">09:00 Research</div></div><div class="day"><b>24</b></div><div class="day"><b>25</b><div class="event">18:00 YT Short</div><div class="event ig">18:00 IG Reel</div></div><div class="day"><b>26</b></div><div class="day"><b>27</b></div><div class="day"><b>28</b></div></div></div><div class="card" style="margin-top:18px"><h3>Automation rule</h3><p>Every Monday → research AI news → prepare recommendation → pause at topic checkpoint → generate one 9:16 master + carousel → pause at publishing checkpoint → publish to YouTube Shorts and Instagram Reels at scheduled time after confirmation.</p><button class="btn primary" onclick="showToast('Schedule editor opened.')">Edit schedule</button></div></section>
+
+<section id="analytics" class="page"><div class="eyebrow">PERFORMANCE</div><h1 class="title">Analytics</h1><p class="sub">Real pipeline metrics from your workspace. View-based metrics require the YouTube Analytics API (roadmap).</p><div class="grid g4"><div class="card"><div class="label">VIDEOS CREATED</div><div class="stat" id="anVideos">0</div></div><div class="card"><div class="label">PUBLISHED</div><div class="stat" id="anPublished">0</div></div><div class="card"><div class="label">RESEARCH RUNS</div><div class="stat" id="anResearch">0</div></div><div class="card"><div class="label">SOURCES ANALYZED</div><div class="stat" id="anSources">0</div></div></div>
+<div class="grid g2" style="margin-top:18px"><div class="card"><h3>Platform split (published)</h3><div id="anPlatform"><p class="label">Publish a video to see platform data.</p></div></div><div class="card"><h3>Pipeline</h3><p class="sub">Each run: research → topic checkpoint → script → real 9:16 video (voice-over + on-scene stock imagery) → publish checkpoint → YouTube upload. Metrics above update from real workspace activity.</p><button class="btn primary" onclick="go('create')">Create new content</button></div></div></section>
+
+<section id="settings" class="page"><div class="eyebrow">SYSTEM SETTINGS</div><h1 class="title">Settings</h1><p class="sub">Configure integrations, AI and workflow behavior.</p><div class="grid g2"><div class="card"><h3>AI model</h3><p class="sub">The inference provider can be changed without changing the workflow architecture.</p><div class="project"><b>Active</b><br><span class="badge lime">Fast Cloud LLM</span></div><button class="btn">Change model</button></div>
+<div class="card"><h3>YouTube connection</h3><p><span class="green">● Connected</span></p><p class="label">OAuth connection is protected server-side.</p><button class="btn">Reconnect</button></div>
+<div class="card"><h3>Instagram connection</h3><p><span class="green">● Connected</span></p><p class="label">Publishing uses the Instagram Graph API. Tokens are stored encrypted, never in plain text.</p><button class="btn">Reconnect</button></div>
+<div class="card"><h3>Workflow checkpoints</h3><div class="project">Topic selection <span class="badge" style="float:right">Required</span></div><div class="project">Publishing <span class="badge" style="float:right">Required</span></div><p class="label">The workflow automatically pauses only at configured checkpoints.</p></div>
+<div class="card"><h3>Automation stack</h3><div class="project">✓ LangChain</div><div class="project">✓ n8n orchestration</div><div class="project">✓ MCP tools</div><div class="project">✓ Scheduled workflows</div></div></div></section>
+</main></div>
+
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="modalbox"><div class="eyebrow">PUBLISHED</div><h2 id="pubHeading">Published successfully 🎉</h2><p class="sub">The workflow finished uploading to your connected accounts.</p>
+<div class="card" id="ytResult"><div class="row between"><b>▶ YouTube Shorts</b><span class="green">● Public</span></div><span class="label">AI Agents Are Becoming Your Next Coworker · ID AIF_YT_001</span></div>
+<div class="card ig-tint" id="igResult" style="margin-top:10px"><div class="row between"><b>◎ Instagram Reels</b><span class="green">● Live</span></div><span class="label">Shared to Reels + Feed · ID AIF_IG_001</span></div>
+<div class="row" style="margin-top:18px"><button class="btn primary" onclick="closeModal()">Back to dashboard</button><button class="btn" onclick="showToast('In production, this opens the published post URLs.')">Open posts</button></div></div></div>
+
+<script>
+// Backend ünvanı (uvicorn). Lazım olsa buranı dəyiş.
+const API = "http://localhost:8000";
+
+function go(id){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  window.scrollTo(0,0);
+  if(id==='projects') loadProjects();
+  if(id==='dashboard') loadDashboard();
+  if(id==='analytics') loadAnalytics();
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2800)}
+
+let RECO = null;
+let ytPrivacy = 'public';
+let selectedDuration = 45;
+
+function setDur(el){
+  document.querySelectorAll('#durRow .btn').forEach(b=>b.classList.remove('primary'));
+  el.classList.add('primary');
+  selectedDuration = parseInt(el.dataset.dur, 10) || 45;
+}
+
+// #1 — Visibility seçimi (Public/Unlisted/Private)
+function setVis(el){
+  document.querySelectorAll('#visRow .btn').forEach(b=>b.classList.remove('primary'));
+  el.classList.add('primary');
+  ytPrivacy = el.dataset.vis;
+}
+
+async function startFactory(extra){
+  showToast('Research işləyir...'); go('research');
+  // Köhnə/mock mövzuları dərhal təmizlə
+  document.querySelectorAll('#research .grid.g3 .topic').forEach(card=>{
+    const h=card.querySelector('h3'); if(h) h.textContent='Researching…';
+    const l=card.querySelector('.label'); if(l) l.textContent='—';
+    const b=card.querySelector('button'); if(b) b.textContent='…';
+  });
+  // Böyük başlıq + faiz üçün loading (spinner)
+  const rh = document.querySelector('#research .review h2');
+  if(rh) rh.innerHTML = 'Researching…<span class="spin"></span>';
+  const rsc = document.querySelector('#research .review .score-big');
+  if(rsc) rsc.textContent = '…';
+  const command = ((document.querySelector('#create .editor')||{}).value) ||
+                  ((document.getElementById('command')||{}).value) || '';
+  const finalCommand = extra ? (command + ' . Refine the topic recommendation based on this feedback: ' + extra) : command;
+  try{
+    const r = await fetch(API+'/research',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command: finalCommand})});
+    const data = await r.json();
+    if(!data.topics || !data.topics.length){ showToast('Research xətası: '+(data.error||'naməlum')); return; }
+    const topicCards = document.querySelectorAll('#research .grid.g3 .topic');
+    data.topics.forEach((t,i)=>{
+      const card = topicCards[i]; if(!card) return;
+      card.querySelector('h3').textContent = t.title;
+      const lbl = card.querySelector('.label');
+      if(lbl && t.sources_count!=null) lbl.textContent = t.sources_count + ' sources';
+      const btn = card.querySelector('button');
+      if(btn){ btn.textContent = t.is_recommended ? '✓ Approve' : 'Select'; btn.onclick = () => approveTopic(t.title); }
+    });
+    const reco = data.topics.find(t=>t.is_recommended) || data.topics[0];
+    RECO = reco.title;
+    const h = document.querySelector('#research .review h2'); if(h) h.textContent = 'Recommended topic: ' + reco.title;
+    const sc = document.querySelector('#research .review .score-big'); if(sc && reco.score!=null) sc.textContent = reco.score + '%';
+    const total = data.topics.reduce((a,t)=>a+(t.sources_count||0),0) || data.topics.length;
+    const resSteps = document.querySelectorAll('#research .timeline .step');
+    if(resSteps[2]){ const l = resSteps[2].querySelector('.label'); if(l) l.textContent = total + ' sources'; }
+    // Source intelligence: real mənbələr
+    const sl = document.getElementById('sourceList');
+    if(sl){
+      const srcs = data.sources || [];
+      if(srcs.length){
+        sl.innerHTML = srcs.map(s=>{
+          let host=''; try{ host = s.url ? new URL(s.url).hostname.replace('www.','') : ''; }catch(e){}
+          const label = host || (s.title||'source');
+          const link = s.url ? `<a href="${s.url}" target="_blank" style="color:var(--muted);text-decoration:none">${label}</a>` : label;
+          return `<div class="source"><span>${link}</span><span class="score">live</span></div>`;
+        }).join('');
+      } else {
+        sl.innerHTML = '<p class="label">No live sources returned.</p>';
+      }
+    }
+    showToast('Research bitdi → mövzu təsdiqini gözləyir');
+  }catch(e){ showToast('Backend qoşulmadı — uvicorn işləyir?'); }
+}
+
+// Yeni generasiya başlayanda köhnə/mock məzmunu təmizlə (mock flicker + köhnə şəkil problemi)
+function resetStudio(topic){
+  const up = (topic||'').toUpperCase();
+  // Script
+  const ed = document.querySelector('#studio .editor'); if(ed) ed.value = 'Generating script…';
+  // Visuals: başlıqları sıfırla, köhnə şəkilləri sil
+  document.querySelectorAll('#visualPane .card.topic').forEach(card=>{
+    const h=card.querySelector('h3'); if(h) h.textContent='…';
+    const img=card.querySelector('img.sceneImg'); if(img) img.remove();
+  });
+  // Telefon başlıqları → yeni mövzu
+  document.querySelectorAll('#studioPhone .headline, #publish .phone .headline').forEach(el=>{ el.textContent = up || '…'; });
+  // Telefon fonlarını təmizlə (köhnə şəkil qalmasın)
+  document.querySelectorAll('#studioPhone, #publish .phone').forEach(ph=>{ ph.style.backgroundImage=''; });
+  // Voice / Video player-ləri boşalt
+  const va=document.getElementById('voiceAudio'); if(va){ va.removeAttribute('src'); va.load&&va.load(); }
+  const vh=document.getElementById('voiceHint'); if(vh) vh.textContent='Generating voice-over…';
+  const fv=document.getElementById('finalVideo'); if(fv){ fv.removeAttribute('src'); fv.load&&fv.load(); }
+  const vh2=document.getElementById('videoHint'); if(vh2) vh2.textContent='Generating video…';
+  // Publish sahələrini boşalt (köhnə caption qalmasın)
+  document.querySelectorAll('#publish .field').forEach(f=>{ f.value=''; });
+}
+
+async function approveTopic(topicTitle){
+  const topic = topicTitle || RECO || 'Autonomous AI Agents';
+  RECO = topic;
+  showToast('Skript generasiya olunur: ' + topic);
+  go('studio');
+  resetStudio(topic);   // köhnə/mock məzmunu dərhal təmizlə (flicker olmasın)
+  try{
+    const r = await fetch(API+'/script',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:topic,duration:selectedDuration})});
+    const d = await r.json();
+    if(!d.script){ showToast('Skript xətası: '+(d.error||'naməlum')); return; }
+    const s = d.script;
+    document.querySelector('#studio .editor').value = `HOOK\n${s.hook}\n\nBODY\n${s.body}\n\nWHY IT MATTERS\n${s.why}\n\nENDING\n${s.ending}`;
+    // Visuals tab: real headline-lar (şəkillər produce-dan sonra əlavə olunur)
+    const vCards = document.querySelectorAll('#visualPane .card.topic');
+    (d.scenes||[]).forEach((sc,i)=>{ if(vCards[i]){ const hh=vCards[i].querySelector('h3'); if(hh) hh.textContent = sc.headline||''; }});
+    // Telefon preview başlıqları (Studio + Publish)
+    const headline = (d.scenes && d.scenes[0] && d.scenes[0].headline) ? d.scenes[0].headline : topic.toUpperCase();
+    document.querySelectorAll('#studioPhone .headline, #publish .phone .headline').forEach(el=>{ el.textContent = headline; });
+    // Publish sahələri: [0]=YT title, [1]=YT description(#4), [2]=IG caption, [3]=hashtags
+    const pf = document.querySelectorAll('#publish .field');
+    if(pf[0] && d.caption_youtube) pf[0].value = d.caption_youtube;
+    if(pf[1] && d.description_youtube) pf[1].value = d.description_youtube;   // #4 dinamik description
+    if(pf[2] && d.caption_instagram) pf[2].value = d.caption_instagram;
+    if(pf[3] && d.hashtags) pf[3].value = d.hashtags;
+    showToast('Skript hazırdır → video hazırlanır (TTS + şəkillər)...');
+    // Real video + TTS + mövzuya uyğun şəkillər
+    const narration = `${s.hook} ${s.body} ${s.why} ${s.ending}`;
+    fetch(API+'/produce',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({narration, scenes:d.scenes||[]})})
+      .then(r=>r.json()).then(p=>{
+        if(p.ok){ populateStudio(p); showToast('Video hazırdır → Content Studio'); }
+        else showToast('Video xətası: '+(p.error||''));
+      }).catch(()=>showToast('Video: backend qoşulmadı'));
+  }catch(e){ showToast('Backend qoşulmadı'); }
+}
+
+// #3 — Content Studio 4 tab-ını real media ilə doldur
+function populateStudio(p){
+  const bust = '?t=' + Date.now();
+  // Visuals: real səhnə şəkilləri
+  const vCards = document.querySelectorAll('#visualPane .card.topic');
+  (p.scenes||[]).forEach((sc,i)=>{
+    const card = vCards[i]; if(!card) return;
+    if(sc.headline){ const hh=card.querySelector('h3'); if(hh) hh.textContent = sc.headline; }
+    let img = card.querySelector('img.sceneImg');
+    if(!img){ img=document.createElement('img'); img.className='sceneImg'; img.style.cssText='width:100%;border-radius:12px;margin-bottom:10px;aspect-ratio:9/16;object-fit:cover'; card.insertBefore(img, card.firstChild); }
+    img.src = API+'/media/'+sc.image+bust;
+  });
+  // Voice: real audio
+  const va = document.getElementById('voiceAudio');
+  if(va && p.audio){ va.src = API+'/media/'+p.audio+bust; const vh=document.getElementById('voiceHint'); if(vh) vh.textContent='Real generated narration.'; }
+  // Video: real mp4
+  const fv = document.getElementById('finalVideo');
+  if(fv && p.video){ fv.src = API+'/media/'+p.video+bust; const vh2=document.getElementById('videoHint'); if(vh2) vh2.textContent='Real generated 9:16 video with voice-over.'; }
+  // Telefon preview-lara ilk səhnə şəklini fon ver
+  if(p.scenes && p.scenes[0] && p.scenes[0].image){
+    const url = API+'/media/'+p.scenes[0].image+bust;
+    document.querySelectorAll('#studioPhone, #publish .phone').forEach(ph=>{ ph.style.backgroundImage=`linear-gradient(#0006,#0009), url('${url}')`; ph.style.backgroundSize='cover'; ph.style.backgroundPosition='center'; });
+  }
+}
+
+// #5 — Projects: real datadan
+async function loadProjects(){
+  try{
+    const r = await fetch(API+'/projects'); const d = await r.json();
+    const rows = d.projects||[];
+    const table = document.querySelector('#projects table');
+    if(!table) return;
+    let html = '<tr><th>Project</th><th>Status</th><th>Platform</th><th>Visibility</th><th>Created</th><th></th></tr>';
+    if(!rows.length){ html += '<tr><td colspan="6" class="label">Hələ publish olunmuş layihə yoxdur. Bir mövzunu publish et.</td></tr>'; }
+    rows.forEach(p=>{
+      const open = p.url ? `<a class="btn" href="${p.url}" target="_blank">Open</a>` : '';
+      html += `<tr><td>${p.title||'—'}</td><td class="green">● ${p.status||'Published'}</td><td><span class="badge lime">${p.platform||'YT'}</span></td><td>${p.privacy||'—'}</td><td>${p.created||''}</td><td>${open}</td></tr>`;
+    });
+    table.innerHTML = html;
+  }catch(e){ /* backend yoxdursa statik qalsın */ }
+}
+
+async function loadDashboard(){
+  try{
+    const [sj, pj] = await Promise.all([
+      fetch(API+'/stats').then(r=>r.json()).catch(()=>({})),
+      fetch(API+'/projects').then(r=>r.json()).catch(()=>({projects:[]}))
+    ]);
+    const rows = pj.projects||[];
+    const st = document.querySelectorAll('#dashboard .stat');
+    if(st[0]) st[0].textContent = (sj.videos_created!=null? sj.videos_created : rows.length);
+    if(st[1]) st[1].textContent = (sj.published!=null? sj.published : rows.length);
+    if(st[2]) st[2].textContent = (sj.research_runs!=null? sj.research_runs : 0);
+    if(st[3]) st[3].textContent = (sj.sources_analyzed!=null? sj.sources_analyzed : 0);
+    // Factory activity (real)
+    const fa1=document.getElementById('faSources'); if(fa1) fa1.textContent = (sj.sources_analyzed!=null? sj.sources_analyzed : 0) + ' sources analyzed';
+    const fa2=document.getElementById('faRuns'); if(fa2) fa2.textContent = (sj.research_runs!=null? sj.research_runs : 0) + ' research runs';
+    const fa3=document.getElementById('faPublished'); if(fa3) fa3.textContent = (sj.published!=null? sj.published : rows.length) + ' videos published';
+    const rp = document.querySelector('#dashboard .grid.g2 .card');
+    if(rp){
+      if(rows.length){
+        let h = '<h3>Recent projects</h3>';
+        rows.slice(0,4).forEach(p=>{ h += `<div class="project"><b>${p.title||'—'}</b> <span class="badge lime" style="float:right">${p.platform||'YT'}</span><br><span class="status green">● ${p.status||'Published'}</span></div>`; });
+        rp.innerHTML = h;
+      } else {
+        rp.innerHTML = '<h3>Recent projects</h3><p class="label">No projects yet. Create your first video.</p>';
+      }
+    }
+  }catch(e){}
+}
+
+async function loadAnalytics(){
+  try{
+    const [sj, pj] = await Promise.all([
+      fetch(API+'/stats').then(r=>r.json()).catch(()=>({})),
+      fetch(API+'/projects').then(r=>r.json()).catch(()=>({projects:[]}))
+    ]);
+    const rows = pj.projects||[];
+    const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+    set('anVideos', sj.videos_created!=null? sj.videos_created : rows.length);
+    set('anPublished', sj.published!=null? sj.published : rows.length);
+    set('anResearch', sj.research_runs!=null? sj.research_runs : 0);
+    set('anSources', sj.sources_analyzed!=null? sj.sources_analyzed : 0);
+    // Platform split (real, published layihələrdən)
+    const el = document.getElementById('anPlatform');
+    if(el){
+      const yt = rows.filter(p=>(p.platform||'').toLowerCase().includes('you')||(p.platform||'')==='YouTube'||(p.platform||'')==='YT').length;
+      const total = rows.length || 1;
+      if(rows.length){
+        const pct = Math.round(yt/total*100);
+        el.innerHTML = `<p>YouTube · ${yt} published</p><div class="bar"><i style="width:${pct}%"></i></div>`;
+      } else {
+        el.innerHTML = '<p class="label">Publish a video to see platform data.</p>';
+      }
+    }
+  }catch(e){}
+}
+
+// --- Səsli prompt (Web Speech API) ---
+let _rec = null, _recOn = false;
+function toggleVoice(){
+  const btn = document.getElementById('voiceBtn');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ showToast('Bu brauzer səsli girişi dəstəkləmir — Chrome işlət.'); return; }
+  if(_recOn){ if(_rec) _rec.stop(); return; }
+  _rec = new SR();
+  _rec.lang = 'en-US';           // İngiliscə (skript İngiliscədir)
+  _rec.interimResults = true;
+  _rec.continuous = true;
+  const ta = document.querySelector('#create .editor');
+  const base = (ta.value ? ta.value.trim() + ' ' : '');
+  _rec.onstart = () => { _recOn = true; btn.textContent = '⏹ Stop'; btn.classList.add('primary'); showToast('Dinləyirəm... danış'); };
+  _rec.onerror = (e) => { showToast('Səs xətası: ' + (e.error||'')); };
+  _rec.onend = () => { _recOn = false; btn.textContent = '🎙 Record voice'; btn.classList.remove('primary'); };
+  _rec.onresult = (ev) => {
+    let txt = '';
+    for(let i=0; i<ev.results.length; i++){ txt += ev.results[i][0].transcript; }
+    ta.value = base + txt;
+  };
+  _rec.start();
+}
+
+function researchAgain(){
+  const f = (document.getElementById('feedback')||{}).value || '';
+  showToast(f ? 'Yenidən research (feedback ilə)...' : 'Yenidən research...');
+  startFactory(f);
+}
+function selectTab(el,id){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function togglePlatform(el){el.classList.toggle('on');const pub=el.getAttribute('data-pub');if(pub){const yt=document.querySelector('[data-pub="yt"]').classList.contains('on');const ig=document.querySelector('[data-pub="ig"]').classList.contains('on');const note=document.getElementById('publishNote');if(yt&&ig)note.textContent='The video will be uploaded to YouTube and Instagram after confirmation.';else if(yt)note.textContent='The video will be uploaded to YouTube only after confirmation.';else if(ig)note.textContent='The video will be uploaded to Instagram only after confirmation.';else note.textContent='Select at least one platform to publish.'}}
+function switchPreview(p){const phone=document.getElementById('studioPhone'),tag=document.getElementById('phoneTag');document.getElementById('prevYt').classList.toggle('on',p==='yt');document.getElementById('prevIg').classList.toggle('on',p==='ig');if(p==='ig'){phone.classList.add('ig');tag.className='badge ig';tag.textContent='REELS'}else{phone.classList.remove('ig');tag.className='badge lime';tag.textContent='AI NEWS'}}
+
+async function publishVideo(){
+  const yt = document.querySelector('[data-pub="yt"]').classList.contains('on');
+  const ig = document.querySelector('[data-pub="ig"]').classList.contains('on');
+  if(!yt && !ig){ showToast('Select at least one platform to publish.'); return; }
+  document.getElementById('ytResult').style.display = yt ? 'block' : 'none';
+  document.getElementById('igResult').style.display = ig ? 'block' : 'none';
+  if(yt){
+    showToast('YouTube-a real upload olunur...');
+    const title = document.querySelectorAll('#publish .field')[0].value;
+    const desc  = document.querySelectorAll('#publish .field')[1].value;
+    try{
+      const r = await fetch(API+'/publish/youtube',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({title, description:desc, privacy:ytPrivacy})});   // #1 privacy ötürülür
+      const d = await r.json();
+      const lbl = document.querySelector('#ytResult .label');
+      if(d.ok){ lbl.textContent = 'Uploaded via API ('+(d.privacy||'')+') · ' + d.url; }
+      else{ lbl.textContent = 'Upload error: ' + (d.error||''); }
+    }catch(e){ document.querySelector('#ytResult .label').textContent = 'Backend qoşulmadı'; }
+  }
+  const n = (yt?1:0) + (ig?1:0);
+  document.getElementById('pubHeading').textContent = 'Published to ' + n + ' platform' + (n>1?'s':'') + ' 🎉';
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');go('dashboard')}
+
+// Səhifə açılanda real data yüklə (backend qoşulmasa mövcud qalır)
+loadDashboard();
+loadProjects();
+
+// Workflow işləməmiş mock görünməsin — Studio/Publish sahələrini neytrallaşdır
+function initReset(){
+  const ed = document.querySelector('#studio .editor'); if(ed) ed.value = '';
+  document.querySelectorAll('#visualPane .card.topic').forEach(card=>{
+    const h=card.querySelector('h3'); if(h) h.textContent='—';
+    const img=card.querySelector('img.sceneImg'); if(img) img.remove();
+  });
+  document.querySelectorAll('#studioPhone .headline, #publish .phone .headline').forEach(el=>{ el.textContent='—'; });
+  document.querySelectorAll('#studioPhone, #publish .phone').forEach(ph=>{ ph.style.backgroundImage=''; });
+  document.querySelectorAll('#publish .field').forEach(f=>{ f.value=''; });
+  const va=document.getElementById('voiceAudio'); if(va){ va.removeAttribute('src'); }
+  const vh=document.getElementById('voiceHint'); if(vh) vh.textContent='Run a workflow to generate the voice-over.';
+  const fv=document.getElementById('finalVideo'); if(fv){ fv.removeAttribute('src'); }
+  const vh2=document.getElementById('videoHint'); if(vh2) vh2.textContent='Run a workflow to generate the video.';
+}
+initReset();
+</script>
+</body>
+</html>
