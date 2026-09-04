@@ -52,7 +52,16 @@ _ALLOWED_MEDIA = re.compile(r"^[\w\-.]+\.(jpg|jpeg|png|mp3|mp4|wav)$", re.I)
 def get_media(name: str):
     safe = os.path.basename(name)          # path traversal-ı bağla
     if _ALLOWED_MEDIA.match(safe) and os.path.exists(safe):
-        return FileResponse(safe)
+        ext = safe.rsplit(".", 1)[-1].lower()
+        mime = {
+            "mp4": "video/mp4",
+            "mp3": "audio/mpeg",
+            "wav": "audio/wav",
+            "jpg": "image/jpeg",
+            "jpeg": "image/jpeg",
+            "png": "image/png",
+        }.get(ext, "application/octet-stream")
+        return FileResponse(safe, media_type=mime)
     return {"error": "not found"}
 
 # --- Persistence: SQLite (real DB). Köhnə JSON varsa avtomatik köçürülür. ---
