@@ -168,9 +168,11 @@ def build_video(scenes, audio_path=None, out="final.mp4", stills_dir="."):
     cmd = ["ffmpeg","-y"] + inputs
     if audio_path and os.path.exists(audio_path):
         cmd += ["-i", audio_path, "-filter_complex", fc,
-                "-map","[v]","-map","4:a","-c:v","libx264","-c:a","aac","-shortest", out, "-loglevel","error"]
+                "-map","[v]","-map","4:a","-c:v","libx264","-c:a","aac",
+                "-movflags","+faststart","-shortest", out, "-loglevel","error"]
     else:
-        cmd += ["-filter_complex", fc, "-map","[v]","-c:v","libx264", out, "-loglevel","error"]
+        cmd += ["-filter_complex", fc, "-map","[v]","-c:v","libx264",
+                "-movflags","+faststart", out, "-loglevel","error"]
     subprocess.run(cmd, check=True)
     return out
 
@@ -180,7 +182,7 @@ def synthesize(text, out="voice.mp3"):
     key = os.getenv("ELEVENLABS_API_KEY")
     if key:
         import requests
-        vid = os.getenv("ELEVENLABS_VOICE_ID", "PGoKnSD4gKn2aS99wOR2")  # Brian S.
+        vid = os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")  # Rachel
         r = requests.post(f"https://api.elevenlabs.io/v1/text-to-speech/{vid}",
             headers={"xi-api-key": key, "Content-Type":"application/json"},
             json={"text": text, "model_id":"eleven_multilingual_v2"})
