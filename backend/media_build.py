@@ -165,15 +165,19 @@ def build_video(scenes, audio_path=None, out="final.mp4", stills_dir="."):
     fc = f"[0][1]xfade=transition=fade:duration={T}:offset={round(1*(L-T),2)}[x1];" \
          f"[x1][2]xfade=transition=fade:duration={T}:offset={round(2*(L-T),2)}[x2];" \
          f"[x2][3]xfade=transition=fade:duration={T}:offset={round(3*(L-T),2)},format=yuv420p[v]"
+    # Atomik yazma: əvvəl müvəqqəti fayla yaz, tam bitəndə rename et.
+    # Belə polling/oxuma heç vaxt yarımçıq (moov atom-suz) fayl görməz.
+    tmp_out = out + ".tmp.mp4"
     cmd = ["ffmpeg","-y"] + inputs
     if audio_path and os.path.exists(audio_path):
         cmd += ["-i", audio_path, "-filter_complex", fc,
                 "-map","[v]","-map","4:a","-c:v","libx264","-c:a","aac",
-                "-movflags","+faststart","-shortest", out, "-loglevel","error"]
+                "-movflags","+faststart","-shortest", tmp_out, "-loglevel","error"]
     else:
         cmd += ["-filter_complex", fc, "-map","[v]","-c:v","libx264",
-                "-movflags","+faststart", out, "-loglevel","error"]
+                "-movflags","+faststart", tmp_out, "-loglevel","error"]
     subprocess.run(cmd, check=True)
+    os.replace(tmp_out, out)   # atomik: yalnız tam fayl final.mp4 olur
     return out
 
 
